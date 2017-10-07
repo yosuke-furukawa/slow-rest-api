@@ -2,8 +2,6 @@
 
 var crypto = require('crypto')
 
-const noop = () => {};
-
 module.exports = etag
 
 function etag (opts) {
