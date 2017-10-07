@@ -2,51 +2,29 @@
 
 var crypto = require('crypto')
 
-var etagCache = require('./etag-cache.json')
 const noop = () => {};
 
 module.exports = etag
 
-function etag (entity, opts) {
-  if (Object(entity) === entity) {
-    opts = entity || { entity: null, algorithm: null, encoding: null, output: null }
-    entity = opts.entity
-  }
+function etag (opts) {
+  var options = { 
+    entity: opts.entity, 
+    algorithm: opts.algorithm || 'md5', 
+    encoding: opts.encoding || 'utf8', 
+    output: opts.output || 'base64' 
+  }; 
 
-  opts = opts || { algorithm: null, encoding: null, output: null }
-  opts.algorithm = opts.algorithm || 'md5'
-  opts.encoding = opts.encoding || 'utf8'
-  opts.output = opts.output || 'base64'
-
-  for (var k in etagCache) {
-    var match = (etagCache[k].algorithm === opts.algorithm &&
-      etagCache[k].encoding === opts.encoding &&
-      etagCache[k].output === opts.output &&
-      Buffer.from(entity).equals(Buffer.from(etagCache[k].content.data))) &&
-      k
-    if (match) { return match }
-  }
-
-
-  var hash = { digest: noop };
-
-  try {
-    hash = crypto
-    .createHash(opts.algorithm)
-    .update(entity, opts.encoding)
-
-    if (!opts.output || opts.output === 'base64') {
-      hash = hash
-      .digest('base64')
-      .replace(/=+$/, '')
-      return hash
-    }
-
-    hash = hash.digest(opts.output)
-    return hash
-  } catch (e) {
+  if (options.algorithm !== 'md5' && options.algorithm !== 'sha256') {
     return Error('oh oh')
   }
+
+  var hash = crypto
+    .createHash(options.algorithm)
+    .update(options.entity, options.encoding)
+    .digest(options.output)
+    .replace(/=+$/, '')
+
+  return hash
 
   /**
    *  DUMAIN. Will you vouchsafe with me to change a word?

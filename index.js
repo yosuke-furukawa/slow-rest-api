@@ -8,7 +8,7 @@ var server = restify.createServer()
 var count = 1
 
 server.get('/a', function (req, res, next) {
-  var tag = etag(pkg + ++count)
+  var tag = etag({ entity: pkg + ++count })
 
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)
@@ -30,7 +30,7 @@ server.get('/b', function (req, res, next) {
 })
 
 server.get('/c', function (req, res, next) {
-  var tag = etag(pkg + ++count, {algorithm: 'sha512WithRsaEncryption'})
+  var tag = etag({entity: pkg + ++count, algorithm: 'sha512WithRsaEncryption'})
 
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)
